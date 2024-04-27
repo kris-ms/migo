@@ -23,13 +23,12 @@ func (b *Builder) Build() error {
 	var outdir string
 	outdir = normalizedWorkDir + "build/"
 
-    if err := os.RemoveAll(outdir); err != nil {
-        return err
-    }
-
+	if err := os.RemoveAll(outdir); err != nil {
+		return err
+	}
 
 	files := []string{}
-    err := filepath.WalkDir(b.workDir, func(path string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir(b.workDir, func(path string, d fs.DirEntry, err error) error {
 		files = append(files, path)
 		return nil
 	})
@@ -76,16 +75,16 @@ func (b *Builder) Build() error {
 
 		out, err := md.Convert()
 		if err != nil {
-            return fmt.Errorf("bad convert to md %v, %v: %v", out, md, err)
+			return fmt.Errorf("bad convert to md %v, %v: %v", out, md, err)
 		}
 		fmt.Println(out)
 	}
-    include := Include{
-        includeDir: normalizedWorkDir + "include/",
-    }
+	include := Include{
+		includeDir: normalizedWorkDir + "include/",
+	}
 
-    if err := include.Copy(outdir); err != nil {
-        return err
-    }
+	if err := include.Copy(outdir); err != nil {
+		return err
+	}
 	return nil
 }
