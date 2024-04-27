@@ -21,21 +21,20 @@ func (t *TemplateMaker) Execute(data any) ([]byte, error) {
 		return make([]byte, 0), fmt.Errorf("executing tmpl: %v", err)
 	}
 	out := make([]byte, rdbuf.Len())
-	bytesread, err := rdbuf.Read(out)
+	br, err := rdbuf.Read(out)
 	if err != nil {
-		return make([]byte, 0), fmt.Errorf("reading tmpl: %v", err)
+		return make([]byte, 0), fmt.Errorf("reading tmpl: %v, bytes read: %d", err, br)
 	}
-	fmt.Printf("read %d bytes from executed template\n", bytesread)
 	return gohtml.FormatBytes(out), nil
 }
 
 func (t *TemplateMaker) getTemplate() *template.Template {
 	if !path.IsAbs(t.inputPath) {
-		panic(errors.New("invalid path, provide absolute path to .html template file"))
+		panic(errors.New(fmt.Sprintf("invalid path %v", t.inputPath)))
 	}
 	tmpl, err := template.ParseFiles(t.inputPath)
 	if err != nil {
-		panic(err)
+		panic(errors.New(fmt.Sprintf("failed to parse template %v", tmpl)))
 	}
 	return tmpl
 }

@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/urfave/cli/v2"
 )
@@ -21,7 +22,7 @@ func main() {
 				Action: func(cCtx *cli.Context) error {
 					absWorkdir, err := filepath.Abs(cCtx.Args().First())
 					if err != nil {
-						return err
+						return fmt.Errorf("invalid path error %v: %v", absWorkdir, err)
 					}
 
 					builder := Builder{
@@ -29,9 +30,21 @@ func main() {
 					}
 
 					fmt.Printf("Attempting to build in directory %v\n", builder.workDir)
+					start := time.Now().UnixMilli()
 
-					err = builder.Build()
-					return err
+					if err := builder.Build(); err != nil {
+						return fmt.Errorf("failed to build with error: %v", err)
+					}
+
+					end := time.Now().UnixMilli() - start
+
+					fmt.Printf(
+						"Successfully build to directory %v, time elapsed: %v\n",
+						builder.workDir+"/build",
+						fmt.Sprintf("%vms", end),
+					)
+
+					return nil
 				},
 			},
 		},

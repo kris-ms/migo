@@ -24,16 +24,19 @@ func (b *Builder) Build() error {
 	outdir = normalizedWorkDir + "build/"
 
 	if err := os.RemoveAll(outdir); err != nil {
-		return err
+		return fmt.Errorf("failed to clean build: %v", err)
 	}
 
 	files := []string{}
 	err := filepath.WalkDir(b.workDir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
 		files = append(files, path)
 		return nil
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("walkdir failed: %v", err)
 	}
 	mdFiles := []string{}
 	templateFiles := []string{}
@@ -45,15 +48,11 @@ func (b *Builder) Build() error {
 			templateFiles = append(templateFiles, file)
 		}
 	}
-	fmt.Printf("md files: %v\n", mdFiles)
-	fmt.Printf("template files: %v\n", templateFiles)
 
 	for _, fileToConvert := range mdFiles {
 
 		filename := filepath.Base(fileToConvert)
 		fileNoExt := strings.TrimSuffix(filename, ".md")
-
-		fmt.Println(fileNoExt)
 
 		matchIdx := slices.IndexFunc(templateFiles, func(ele string) bool {
 			tmplFileName := filepath.Base(ele)
@@ -62,7 +61,7 @@ func (b *Builder) Build() error {
 		})
 
 		if matchIdx == -1 {
-			return fmt.Errorf("match templates %v idx %d: %v, outdir: %v", templateFiles, matchIdx, fileNoExt, outdir)
+			return fmt.Errorf("no template match for %v: %v", fileNoExt, templateFiles)
 		}
 
 		outpath := outdir + fileNoExt + ".html"
@@ -77,14 +76,13 @@ func (b *Builder) Build() error {
 		if err != nil {
 			return fmt.Errorf("bad convert to md %v, %v: %v", out, md, err)
 		}
-		fmt.Println(out)
 	}
 	include := Include{
 		includeDir: normalizedWorkDir + "include/",
 	}
 
 	if err := include.Copy(outdir); err != nil {
-		return err
+		return fmt.Errorf("failed to copy %v to %v: %v", include, outdir, err)
 	}
 	return nil
 }

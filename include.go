@@ -36,8 +36,6 @@ func (i *Include) Copy(buildDir string) error {
 		return nil
 	})
 
-	fmt.Println(outputFiles)
-
 	for i, file := range includeFiles {
 		input, err := os.Open(file)
 		if err != nil {
@@ -52,8 +50,6 @@ func (i *Include) Copy(buildDir string) error {
 		}
 		if bw, err := io.Copy(output, input); err != nil {
 			return fmt.Errorf("error copying files %v to %v, %v bytes written: %v", input, output, bw, err)
-		} else {
-			fmt.Printf("%d bytes copied from %q to %q..\n", bw, input.Name(), output.Name())
 		}
 	}
 	return nil

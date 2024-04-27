@@ -48,9 +48,8 @@ func (m *MDConverter) Convert() (string, error) {
 	htmlOutput := make([]byte, convertBuffer.Len())
 	br, err := convertBuffer.Read(htmlOutput)
 	if err != nil {
-		return "", fmt.Errorf("read converted htmlOutput to buf %v: %v", htmlOutput, err)
+		return "", fmt.Errorf("read converted htmlOutput to buf %v: %v, bytes read: %v", htmlOutput, err, br)
 	}
-	fmt.Println(br, "bytes read from htmlOutput buffer.")
 
 	out, err := m.makeOutput(htmlOutput)
 
@@ -84,7 +83,6 @@ func (m *MDConverter) getSource() ([]byte, error) {
 	if err != nil {
 		return make([]byte, 0), fmt.Errorf("read %v to source buffer: %v, bytes read: %d", source, err, br)
 	}
-	fmt.Println(br, "bytes read from source.")
 
 	return source, nil
 }
@@ -118,9 +116,8 @@ func (m *MDConverter) makeOutput(convertedHtml []byte) ([]byte, error) {
 
 	bw, err := output.Write(out)
 	if err != nil {
-		return make([]byte, 0), fmt.Errorf("write out to file %v, %v: %v", out, m.outputPath, err)
+		return make([]byte, 0), fmt.Errorf("write out to file %v, %v: %v, bw: %v", out, m.outputPath, err, bw)
 	}
-	fmt.Println(bw, "bytes written to", m.outputPath)
 
 	return out, nil
 }
