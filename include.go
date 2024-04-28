@@ -25,16 +25,21 @@ func (i *Include) Copy(buildDir string) error {
 
 	includeFiles := make([]string, 0)
 	outputFiles := make([]string, 0)
-	err = filepath.WalkDir(incpath, func(path string, d fs.DirEntry, err error) error {
+
+	collect := func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			return err
+			return fmt.Errorf("error collecting include file %v, %v", d, err)
 		}
 		if d.IsDir() == false {
 			includeFiles = append(includeFiles, path)
 			outputFiles = append(outputFiles, buildDir+strings.TrimPrefix(path, i.includeDir))
 		}
 		return nil
-	})
+	}
+
+	if err := filepath.WalkDir(incpath, collect); err != nil {
+		return fmt.Errorf("failed walkdir %v: %v", incpath, err)
+	}
 
 	for i, file := range includeFiles {
 		input, err := os.Open(file)

@@ -54,14 +54,28 @@ func (b *Builder) Build() error {
 		filename := filepath.Base(fileToConvert)
 		fileNoExt := strings.TrimSuffix(filename, ".md")
 
-		matchIdx := slices.IndexFunc(templateFiles, func(ele string) bool {
-			tmplFileName := filepath.Base(ele)
+		matchIdx := slices.IndexFunc(templateFiles, func(tp string) bool {
+			tmplFileName := filepath.Base(tp)
 			tmplFileNoExt := strings.TrimSuffix(tmplFileName, ".html")
 			return tmplFileNoExt == fileNoExt
 		})
 
+		globalTemplateIdx := slices.IndexFunc(templateFiles, func(tp string) bool {
+			tmplFileName := filepath.Base(tp)
+			tmplFileNoExt := strings.TrimSuffix(tmplFileName, ".html")
+			return tmplFileNoExt == "global"
+		})
+
+		var templatePath string
+
 		if matchIdx == -1 {
-			return fmt.Errorf("no template match for %v: %v", fileNoExt, templateFiles)
+			if globalTemplateIdx >= 0 {
+				templatePath = templateFiles[globalTemplateIdx]
+			} else {
+				return fmt.Errorf("no template match for %v: %v and no global template provided", fileNoExt, templateFiles)
+			}
+		} else {
+			templatePath = templateFiles[matchIdx]
 		}
 
 		outpath := outdir + fileNoExt + ".html"
@@ -69,7 +83,7 @@ func (b *Builder) Build() error {
 		md := MDConverter{
 			inputPath:    fileToConvert,
 			outputPath:   outpath,
-			templatePath: templateFiles[matchIdx],
+			templatePath: templatePath,
 		}
 
 		out, err := md.Convert()
